@@ -1,0 +1,4 @@
+export const CACHE_KEY = {
+  SESSOES_DATA: "SESSOES_DATA",
+  CONFIGS: "CONFIGS",
+};

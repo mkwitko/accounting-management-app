@@ -1,0 +1,119 @@
+# Codemagic CI/CD — Plantio UDV (Expo prebuild)
+# android/ e ios/ sao gitignorados -> cada build roda `expo prebuild` do zero.
+# O signing release do Android e injetado pelo config plugin
+# plugins/withAndroidReleaseSigning.js durante o prebuild (nada de editar build.gradle na mao).
+#
+# Antes do primeiro build, configure no Codemagic UI (ver README no fim do arquivo):
+#   - Keystore Android com reference name: plantio_keystore
+#   - Grupo de variaveis: google_play   -> GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS
+#   - Grupo de variaveis: expo_env      -> EXPO_PUBLIC_BACKEND, EXPO_PUBLIC_APP_VERSION, EXPO_OAUTH_CLIENT_ID
+#   - Integration App Store Connect API key com name: plantio_asc_api_key
+
+definitions:
+  scripts:
+    - &write_env
+      name: Gerar .env (Expo le via dotenv em app.config.js)
+      script: |
+        cat > "$CM_BUILD_DIR/.env" <<EOF
+        EXPO_PUBLIC_BACKEND=$EXPO_PUBLIC_BACKEND
+        EXPO_PUBLIC_APP_VERSION=$EXPO_PUBLIC_APP_VERSION
+        EXPO_OAUTH_CLIENT_ID=$EXPO_OAUTH_CLIENT_ID
+        EOF
+    - &npm_install
+      name: Instalar dependencias
+      script: yarn install --frozen-lockfile
+
+workflows:
+  # ------------------------------------------------------------------ ANDROID
+  android-production:
+    name: Plantio UDV — Android (Google Play)
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    environment:
+      android_signing:
+        - plantio_keystore
+      groups:
+        - google_play
+        - expo_env
+      vars:
+        PACKAGE_NAME: "com.udv.sustentabilidade"
+      node: 20.18.0
+    scripts:
+      - *npm_install
+      - *write_env
+      - name: Rodar Expo Prebuild (Android)
+        # o config plugin withAndroidReleaseSigning ja injeta o signing release aqui
+        script: npx expo prebuild --platform android
+      - name: Setar Android SDK location
+        script: echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Build AAB release
+        script: |
+          LATEST_GOOGLE_PLAY_BUILD_NUMBER=$(google-play get-latest-build-number --package-name "$PACKAGE_NAME" 2>/dev/null || echo "")
+          if [ -z "$LATEST_GOOGLE_PLAY_BUILD_NUMBER" ]; then
+            UPDATED_BUILD_NUMBER=$BUILD_NUMBER
+          else
+            UPDATED_BUILD_NUMBER=$(($LATEST_GOOGLE_PLAY_BUILD_NUMBER + 1))
+          fi
+          cd android
+          ./gradlew bundleRelease -PversionCode=$UPDATED_BUILD_NUMBER
+    artifacts:
+      - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/**/mapping.txt
+    publishing:
+      google_play:
+        credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS
+        track: production
+        submit_as_draft: true
+
+  # ---------------------------------------------------------------------- iOS
+  ios-production:
+    name: Plantio UDV — iOS (App Store)
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: plantio_asc_api_key
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.udv.sustentabilidade
+      groups:
+        - expo_env
+      vars:
+        BUNDLE_ID: "com.udv.sustentabilidade"
+        XCODE_WORKSPACE: "PlantioUDV.xcworkspace"
+        XCODE_SCHEME: "PlantioUDV"
+        APP_STORE_APPLE_ID: "<APP_STORE_APPLE_ID>" # <-- Apple ID numerico do app no App Store Connect
+      node: 20.18.0
+    scripts:
+      - *npm_install
+      - *write_env
+      - name: Rodar Expo Prebuild (iOS)
+        script: npx expo prebuild --platform ios
+      - name: Info.plist ITSAppUsesNonExemptEncryption=false
+        script: |
+          PLIST=$CM_BUILD_DIR/ios/$XCODE_SCHEME/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PLIST" || \
+          /usr/libexec/PlistBuddy -c "Set :ITSAppUsesNonExemptEncryption false" "$PLIST"
+      - name: Instalar CocoaPods
+        script: cd ios && pod install
+      - name: Aplicar provisioning profiles no projeto Xcode
+        script: xcode-project use-profiles
+      - name: Incrementar build number
+        script: |
+          cd $CM_BUILD_DIR/ios
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || echo "0")
+          agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
+      - name: Build IPA distribuicao
+        script: |
+          xcode-project build-ipa \
+            --workspace "$CM_BUILD_DIR/ios/$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false # mude p/ true quando quiser mandar review da loja direto

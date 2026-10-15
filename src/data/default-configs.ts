@@ -1,0 +1,23 @@
+export const defaultConfigs = {
+    DIAMETRO_BASE: 0.25,
+    DIAMETRO_TOPO: 0.08,
+    ALTURA_TRONCO: 17,
+    CRESCIMENTO_ANUAL: 20,
+    M2_POR_MARIRI: 25,
+    ANOS_PARA_COLHEITA_MARIRI: 10,
+    M2_POR_CHACRONA: 10,
+    M2_POR_ARVORE_LENHA: 5,
+    ANOS_PARA_COLHEITA_ARVORE: 7,
+  };
+
+export interface Configs {
+  DIAMETRO_BASE: number;
+  DIAMETRO_TOPO: number;
+  ALTURA_TRONCO: number;
+  CRESCIMENTO_ANUAL: number;
+  M2_POR_MARIRI: number;
+  ANOS_PARA_COLHEITA_MARIRI: number;
+  M2_POR_CHACRONA: number;
+  M2_POR_ARVORE_LENHA: number;
+  ANOS_PARA_COLHEITA_ARVORE: number;
+}
