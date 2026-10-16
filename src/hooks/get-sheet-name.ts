@@ -12,15 +12,15 @@ export default function useGetSheetName() {
   const getSheetName = () => {
     if (nucleoView) {
       const nucleo = nucleos?.find((n) => n.id === nucleoView);
-      return `Sustentabilidade - ${nucleo?.nome}`;
+      return `Field Data - ${nucleo?.nome}`;
     } else if (regionView) {
       const regiao = regioes?.find((r) => r.id === regionView);
-      return `Sustentabilidade - ${regiao?.nome}`;
+      return `Field Data - ${regiao?.nome}`;
     } else if (generalView) {
-      return "Sustentabilidade - Geral";
+      return "Field Data - Geral";
     }
 
-    return `Sustentabilidade - ${user?.nucleo?.nome || user?.nome}`;
+    return `Field Data - ${user?.nucleo?.nome || user?.nome}`;
   };
 
   return {

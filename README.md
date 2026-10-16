@@ -1,4 +1,4 @@
-# Accounting Management App
+# Field Operations Tracker App
 
 Expo / React Native app for field users to record preparations, sessions and stock for their unit, view consolidated reports, and optionally export them to Google Sheets.
 
@@ -19,8 +19,8 @@ Status: working client built for a private organisation; not published as an ope
 
 ```mermaid
 flowchart LR
-  App["accounting-management-app (this repo)"] -->|"REST, Bearer"| API["accounting-management-api"]
-  Web["accounting-management-web"] -->|REST| API
+  App["field-operations-tracker-app (this repo)"] -->|"REST, Bearer"| API["field-operations-tracker-api"]
+  Web["field-operations-tracker-web"] -->|REST| API
   API --> DB[(Database)]
   API --> Cognito[AWS Cognito]
   API --> Sheets[Google Sheets]
@@ -56,7 +56,7 @@ Expo 54, React Native 0.81, Expo Router, NativeWind, TanStack Query, React Hook 
 
 ## Getting started
 
-Prerequisites: Node 20+, Yarn, Android Studio or Xcode, a running backend ([accounting-management-api](https://github.com/mkwitko/accounting-management-api)).
+Prerequisites: Node 20+, Yarn, Android Studio or Xcode, a running backend ([field-operations-tracker-api](https://github.com/mkwitko/field-operations-tracker-api)).
 
 ```bash
 yarn install
@@ -89,8 +89,8 @@ plugins/        Android release signing config plugin
 
 ## Related repositories
 
-- [accounting-management-api](https://github.com/mkwitko/accounting-management-api): backend API.
-- [accounting-management-web](https://github.com/mkwitko/accounting-management-web): read-only admin panel.
+- [field-operations-tracker-api](https://github.com/mkwitko/field-operations-tracker-api): backend API.
+- [field-operations-tracker-web](https://github.com/mkwitko/field-operations-tracker-web): read-only admin panel.
 
 ## License
 

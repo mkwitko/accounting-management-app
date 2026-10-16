@@ -1,4 +1,4 @@
-# Codemagic CI/CD — Plantio UDV (Expo prebuild)
+# Codemagic CI/CD — Field Ops Tracker (Expo prebuild)
 # android/ e ios/ sao gitignorados -> cada build roda `expo prebuild` do zero.
 # O signing release do Android e injetado pelo config plugin
 # plugins/withAndroidReleaseSigning.js durante o prebuild (nada de editar build.gradle na mao).
@@ -26,7 +26,7 @@ definitions:
 workflows:
   # ------------------------------------------------------------------ ANDROID
   android-production:
-    name: Plantio UDV — Android (Google Play)
+    name: Field Ops Tracker — Android (Google Play)
     max_build_duration: 120
     instance_type: mac_mini_m2
     environment:
@@ -36,7 +36,7 @@ workflows:
         - google_play
         - expo_env
       vars:
-        PACKAGE_NAME: "com.udv.sustentabilidade"
+        PACKAGE_NAME: "com.example.fieldopstracker"
       node: 20.18.0
     scripts:
       - *npm_install
@@ -67,7 +67,7 @@ workflows:
 
   # ---------------------------------------------------------------------- iOS
   ios-production:
-    name: Plantio UDV — iOS (App Store)
+    name: Field Ops Tracker — iOS (App Store)
     max_build_duration: 120
     instance_type: mac_mini_m2
     integrations:
@@ -75,13 +75,13 @@ workflows:
     environment:
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.udv.sustentabilidade
+        bundle_identifier: com.example.fieldopstracker
       groups:
         - expo_env
       vars:
-        BUNDLE_ID: "com.udv.sustentabilidade"
-        XCODE_WORKSPACE: "PlantioUDV.xcworkspace"
-        XCODE_SCHEME: "PlantioUDV"
+        BUNDLE_ID: "com.example.fieldopstracker"
+        XCODE_WORKSPACE: "FieldOpsTracker.xcworkspace"
+        XCODE_SCHEME: "FieldOpsTracker"
         APP_STORE_APPLE_ID: "<APP_STORE_APPLE_ID>" # <-- Apple ID numerico do app no App Store Connect
       node: 20.18.0
     scripts:

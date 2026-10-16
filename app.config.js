@@ -15,20 +15,20 @@ const iosBuild = Number(iosBuildNumber)
 
 export default {
 	expo: {
-		name: 'Plantio UDV',
-		slug: 'udv-sustentabilidade',
+		name: 'Field Ops Tracker',
+		slug: 'field-operations-tracker',
 		// Fonte unica: `version` do package.json. Use `yarn bump` para alterar.
 		// O prebuild leva isso para versionName (Android) e MARKETING_VERSION (iOS).
 		version,
 		orientation: 'portrait',
 		icon: './assets/images/icon.png',
-		scheme: 'udvsustentabilidade',
+		scheme: 'fieldopstracker',
 		userInterfaceStyle: 'automatic',
 		newArchEnabled: true,
 
 		ios: {
 			supportsTablet: true,
-			bundleIdentifier: 'com.udv.sustentabilidade',
+			bundleIdentifier: 'com.example.fieldopstracker',
 			// prebuild -> CURRENT_PROJECT_VERSION no projeto Xcode.
 			// Contador incremental (nao derivado do semver), ve iosBuildNumber.
 			buildNumber: String(iosBuild),
@@ -38,7 +38,7 @@ export default {
 
 		android: {
 			useNextNotificationsApi: true,
-			package: 'com.udv.sustentabilidade',
+			package: 'com.example.fieldopstracker',
 			// prebuild -> versionCode no android/app/build.gradle
 			versionCode: androidVersionCode,
 			intentFilters: [
@@ -46,7 +46,7 @@ export default {
 					action: 'VIEW',
 					data: [
 						{
-							scheme: 'udvsustentabilidade',
+							scheme: 'fieldopstracker',
 							// Permitir qualquer path
 						},
 					],
@@ -59,7 +59,7 @@ export default {
 			[
 				'expo-router',
 				{
-					origin: 'udvsustentabilidade://',
+					origin: 'fieldopstracker://',
 				},
 			],
 			'expo-font',
